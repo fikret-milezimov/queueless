@@ -29,7 +29,11 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-PROJECT_APPS = ['accounts',]
+PROJECT_APPS = [
+    'accounts',
+    'locations',
+    'services_app'
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
