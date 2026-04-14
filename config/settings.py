@@ -32,7 +32,8 @@ ALLOWED_HOSTS = []
 PROJECT_APPS = [
     'accounts',
     'locations',
-    'services_app'
+    'services_app',
+    'bookings'
 ]
 
 INSTALLED_APPS = [
@@ -61,7 +62,7 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,6 +73,9 @@ TEMPLATES = [
         },
     },
 ]
+
+LOGIN_REDIRECT_URL = "/bookings/my/"
+LOGOUT_REDIRECT_URL = "/"
 
 WSGI_APPLICATION = 'config.wsgi.application'
 

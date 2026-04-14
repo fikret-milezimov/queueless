@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookings | QueueLess{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                <div>
+                    <h1 class="h3 mb-1">My Bookings</h1>
+                    <p class="text-muted mb-0">View your upcoming and past appointments.</p>
+                </div>
+            </div>
+
+            {% if bookings %}
+                <div class="row g-4">
+                    {% for booking in bookings %}
+                        <div class="col-12 col-md-6">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                        <h2 class="h5 card-title mb-0">{{ booking.service.name }}</h2>
+                                        <span class="badge
+                                            {% if booking.status == 'pending' %}text-bg-warning
+                                            {% elif booking.status == 'confirmed' %}text-bg-primary
+                                            {% elif booking.status == 'in_progress' %}text-bg-info
+                                            {% elif booking.status == 'completed' %}text-bg-success
+                                            {% elif booking.status == 'cancelled' %}text-bg-secondary
+                                            {% elif booking.status == 'no_show' %}text-bg-dark
+                                            {% else %}text-bg-light
+                                            {% endif %}">
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                    </div>
+
+                                    <p class="mb-2"><strong>Location:</strong> {{ booking.location.name }}</p>
+                                    <p class="mb-0"><strong>Time:</strong> {{ booking.scheduled_at|date:"M j, Y, H:i" }}</p>
+                                    {% if booking.status == "pending" or booking.status == "confirmed" %}
+                                        <a href="{% url 'bookings:cancel-booking' booking.pk %}"
+                                            class="btn btn-danger btn-sm">
+                                            Cancel
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <h2 class="h5 mb-2">No bookings yet</h2>
+                        <p class="text-muted mb-0">Your bookings will appear here after you create one.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

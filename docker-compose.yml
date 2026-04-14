@@ -27,6 +27,7 @@ services:
     depends_on:
       - db
       - redis
+    user: "1000:1000"
 
   celery:
     build: .
@@ -39,3 +40,4 @@ services:
     depends_on:
       - db
       - redis
+    user: "1000:1000"

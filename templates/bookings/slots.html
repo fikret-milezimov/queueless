@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Available Slots | QueueLess{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                        <div>
+                            <h1 class="h3 mb-1">Available Slots</h1>
+                            <p class="text-muted mb-0">Choose a time to create your booking.</p>
+                        </div>
+                    </div>
+
+                    {% if slots %}
+                        <div class="row g-3">
+                            {% for slot in slots %}
+                                <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                                    <form method="post" action="{% url 'bookings:create' %}" class="h-100">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="scheduled_at" value="{{ slot|date:'c' }}">
+                                        <input type="hidden" name="location" value="{{ request.GET.location }}">
+                                        <input type="hidden" name="service" value="{{ request.GET.service }}">
+
+                                        <button type="submit" class="slot-button btn btn-outline-primary w-100 h-100 py-3 rounded-3">
+                                            <span class="d-block fw-semibold">{{ slot|time:"H:i" }}</span>
+                                            <span class="d-block small text-muted mt-1">{{ slot|date:"D, M j" }}</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="border rounded-3 bg-light text-center py-5 px-4">
+                            <h2 class="h5 mb-2">No available slots</h2>
+                            <p class="text-muted mb-0">Try another service or location.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
