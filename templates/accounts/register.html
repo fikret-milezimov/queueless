@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login | QueueLess{% endblock %}
+{% block title %}Create Account | QueueLess{% endblock %}
 
 {% block content %}
     <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
@@ -8,8 +8,8 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4 p-md-5">
                     <div class="text-center mb-4">
-                        <h1 class="h3 mb-1">Login</h1>
-                        <p class="text-muted mb-0">Sign in to manage your bookings.</p>
+                        <h1 class="h3 mb-1">Create Account</h1>
+                        <p class="text-muted mb-0">Create your account, then sign in to book and manage appointments.</p>
                     </div>
 
                     <form method="post" novalidate>
@@ -27,12 +27,11 @@
                             <div class="mb-3">
                                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                                 <input
-                                    type="{% if field.name == 'password' %}password{% else %}text{% endif %}"
+                                    type="{% if 'password' in field.name %}password{% else %}text{% endif %}"
                                     name="{{ field.html_name }}"
                                     id="{{ field.id_for_label }}"
-                                    value="{% if field.name != 'password' %}{{ field.value|default:'' }}{% endif %}"
+                                    value="{% if 'password' not in field.name %}{{ field.value|default:'' }}{% endif %}"
                                     class="form-control{% if field.errors %} is-invalid{% endif %}"
-                                    {% if field.field.widget.attrs.placeholder %}placeholder="{{ field.field.widget.attrs.placeholder }}"{% endif %}
                                     {% if field.field.required %}required{% endif %}
                                 >
                                 {% for error in field.errors %}
@@ -42,9 +41,14 @@
                         {% endfor %}
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Login</button>
+                            <button type="submit" class="btn btn-primary">Create Account</button>
                         </div>
                     </form>
+
+                    <p class="text-center text-muted mt-4 mb-0">
+                        Already have an account?
+                        <a href="/accounts/login/" class="text-decoration-none">Login</a>
+                    </p>
                 </div>
             </div>
         </div>

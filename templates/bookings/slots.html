@@ -12,29 +12,41 @@
                             <h1 class="h3 mb-1">Available Slots</h1>
                             <p class="text-muted mb-0">Choose a time to create your booking.</p>
                         </div>
+                        {% if request.GET.location %}
+                            <a href="/locations/{{ request.GET.location }}/" class="btn btn-outline-secondary">
+                                Back to Services
+                            </a>
+                        {% endif %}
                     </div>
 
                     {% if slots %}
                         <div class="row g-3">
                             {% for slot in slots %}
                                 <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                                    <form method="post" action="{% url 'bookings:create' %}" class="h-100">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="scheduled_at" value="{{ slot|date:'c' }}">
-                                        <input type="hidden" name="location" value="{{ request.GET.location }}">
-                                        <input type="hidden" name="service" value="{{ request.GET.service }}">
+                                    {% if slot.is_available %}
+                                        <form method="post" action="{% url 'bookings:create' %}" class="h-100">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="scheduled_at" value="{{ slot.time|date:'c' }}">
+                                            <input type="hidden" name="location" value="{{ request.GET.location }}">
+                                            <input type="hidden" name="service" value="{{ request.GET.service }}">
 
-                                        <button type="submit" class="slot-button btn btn-outline-primary w-100 h-100 py-3 rounded-3">
-                                            <span class="d-block fw-semibold">{{ slot|time:"H:i" }}</span>
-                                            <span class="d-block small text-muted mt-1">{{ slot|date:"D, M j" }}</span>
-                                        </button>
-                                    </form>
+                                            <button type="submit" class="slot-button btn btn-outline-primary w-100 h-100 py-3 rounded-3">
+                                                <span class="d-block fw-semibold">{{ slot.time|time:"H:i" }}</span>
+                                                <span class="d-block small text-muted mt-1">{{ slot.time|date:"D, M j" }}</span>
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <div class="slot-button btn btn-light border w-100 h-100 py-3 rounded-3 disabled opacity-75 d-flex flex-column justify-content-center">
+                                            <span class="d-block fw-semibold text-body-secondary">{{ slot.time|time:"H:i" }}</span>
+                                            <span class="d-block small text-muted mt-1">{{ slot.time|date:"D, M j" }}</span>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                         </div>
                     {% else %}
                         <div class="border rounded-3 bg-light text-center py-5 px-4">
-                            <h2 class="h5 mb-2">No available slots</h2>
+                            <h2 class="h5 mb-2">No slots configured</h2>
                             <p class="text-muted mb-0">Try another service or location.</p>
                         </div>
                     {% endif %}

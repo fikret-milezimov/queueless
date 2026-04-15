@@ -1,15 +1,16 @@
-from datetime import date, datetime
+from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from locations.models import Location
 from services_app.models import Service
 
 from .models import Booking
-from .utils import get_available_slots
+from .utils import get_daily_slots
 
 
 def available_slots_view(request):
@@ -22,7 +23,7 @@ def available_slots_view(request):
         location = get_object_or_404(Location, id=location_id)
         service = get_object_or_404(Service, id=service_id)
 
-        slots = get_available_slots(location, service, date.today())
+        slots = get_daily_slots(location, service, timezone.localdate())
 
     context = {
         "slots": slots
@@ -40,9 +41,12 @@ def create_booking(request):
         location = get_object_or_404(Location, id=location_id)
         service = get_object_or_404(Service, id=service_id)
 
-        # 🔥 parse string → datetime
+        # Parse the submitted ISO datetime and normalize it to the current timezone.
         scheduled_at = datetime.fromisoformat(scheduled_at_str)
-        scheduled_at = timezone.make_aware(scheduled_at)
+        if timezone.is_naive(scheduled_at):
+            scheduled_at = timezone.make_aware(scheduled_at, timezone.get_current_timezone())
+        else:
+            scheduled_at = timezone.localtime(scheduled_at, timezone.get_current_timezone())
 
         if not scheduled_at:
             raise ValueError("Invalid datetime format")
@@ -72,7 +76,12 @@ def create_booking(request):
 
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
-        booking.save()
+        try:
+            booking.save()
+        except IntegrityError:
+            messages.error(request, "This time slot is no longer available.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
         messages.success(request, "Booking created successfully!")
 
         return redirect("bookings:my-bookings")
@@ -96,6 +105,10 @@ def my_bookings(request):
 @login_required
 def cancel_booking(request, pk):
     booking = get_object_or_404(Booking, pk=pk, user=request.user)
+
+    if request.method != "POST":
+        messages.error(request, "Please confirm cancellation before continuing.")
+        return redirect("bookings:my-bookings")
 
     if booking.status in ["pending", "confirmed"]:
         booking.status = "cancelled"

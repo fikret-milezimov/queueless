@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from datetime import timedelta
+from django.db.models import Q
 
 
 class Booking(models.Model):
@@ -43,6 +43,15 @@ class Booking(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["location", "service", "scheduled_at"],
+                condition=Q(status__in=["pending", "confirmed", "in_progress"]),
+                name="unique_active_booking_slot",
+            ),
+        ]
+
     def clean(self):
         super().clean()
 
@@ -62,3 +71,16 @@ class Booking(models.Model):
 
         if existing.exists():
             raise ValidationError("You already have a booking for this service today.")
+
+        overlapping = Booking.objects.filter(
+            location=self.location,
+            service=self.service,
+            scheduled_at=self.scheduled_at,
+            status__in=["pending", "confirmed", "in_progress"],
+        )
+
+        if self.pk:
+            overlapping = overlapping.exclude(pk=self.pk)
+
+        if overlapping.exists():
+            raise ValidationError("This time slot is no longer available.")
